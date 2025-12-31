@@ -15,6 +15,7 @@ AI-powered changelog generator that analyzes git commits and generates beautiful
 - 📝 **Clean Markdown Output** - Generates well-formatted, professional changelogs
 - 🚀 **Zero Dependencies** - Uses only Python standard library (no pip install required for basic mode)
 - 🔌 **Multiple AI Providers** - Supports Gemini, OpenAI, and DeepSeek
+- 📤 **WeChat Work Integration** - Push changelog to group chat via webhook
 
 ## 📦 Installation
 
@@ -59,6 +60,9 @@ git-changelog-ai v1.0.0 v1.1.0 --ai
 
 # Output to file
 git-changelog-ai --recent 2 --ai --output CHANGELOG.md
+
+# Send to WeChat Work group
+git-changelog-ai --recent 2 --ai --webhook
 ```
 
 ## 📖 Usage
@@ -86,6 +90,12 @@ git-changelog-ai --recent 2 --dry-run
 
 # Verbose output (includes commit hashes)
 git-changelog-ai --recent 2 --verbose
+
+# Send changelog to WeChat Work group
+git-changelog-ai --recent 2 --ai --webhook
+
+# Send with custom webhook URL
+git-changelog-ai --recent 2 --ai --webhook --webhook-url "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"
 ```
 
 ### Command Options
@@ -103,6 +113,8 @@ git-changelog-ai --recent 2 --verbose
 | `--output`, `-o` | Output file path |
 | `--verbose`, `-v` | Show detailed information |
 | `--dry-run` | Debug mode without calling AI |
+| `--webhook` | Send changelog to WeChat Work group |
+| `--webhook-url` | Custom webhook URL (overrides env var) |
 | `--version` | Show version |
 | `--help`, `-h` | Show help message |
 
@@ -115,6 +127,7 @@ git-changelog-ai --recent 2 --verbose
 | `GOOGLE_API_KEY` | Gemini | Google AI API key |
 | `OPENAI_API_KEY` | OpenAI | OpenAI API key |
 | `DEEPSEEK_API_KEY` | DeepSeek | DeepSeek API key |
+| `WECOM_WEBHOOK_URL` | WeChat Work | Webhook URL for group robot |
 
 ### Supported AI Providers
 
@@ -130,6 +143,14 @@ The following files are automatically ignored when generating changelogs:
 
 - `CHANGELOG.md`, `CHANGELOG*.md`
 - `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
+
+### Ignored Authors
+
+Commits from the following authors are automatically ignored (e.g., CI bots):
+
+- `vfe_athena`
+
+You can modify `IGNORE_AUTHORS` in `constants.py` to customize.
 
 ## 📋 Example Output
 
@@ -170,6 +191,7 @@ git-changelog-ai/
 │       ├── config.py        # Configuration
 │       ├── constants.py     # Constants
 │       ├── types.py         # Type definitions
+│       ├── notify.py        # Notification (WeChat Work)
 │       └── ai/
 │           ├── __init__.py
 │           ├── base.py      # AI API calls

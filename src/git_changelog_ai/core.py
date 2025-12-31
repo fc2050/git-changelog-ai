@@ -21,6 +21,30 @@ from .git import (
     should_ignore_file,
 )
 from .ai import call_ai_api, build_ai_prompt, AI_SYSTEM_PROMPT
+import re
+
+
+def format_version(version: str) -> str:
+    """
+    Format version string to keep only semver format (vX.Y.Z).
+    
+    Examples:
+        v1.0.28.11696rc_ci_202512291840 -> v1.0.28
+        v1.0.29.11744rc_ci_202512302030 -> v1.0.29
+        v1.0.0 -> v1.0.0 (unchanged)
+        v1.0.0-beta.1 -> v1.0.0
+        
+    Args:
+        version: Original version string
+        
+    Returns:
+        Cleaned version string in vX.Y.Z format
+    """
+    # Match semver pattern: v + major.minor.patch
+    match = re.match(r'(v?\d+\.\d+\.\d+)', version)
+    if match:
+        return match.group(1)
+    return version
 
 
 def classify_commits(commits: List[CommitInfo]) -> Dict[str, List[CommitInfo]]:
@@ -166,10 +190,7 @@ def generate_basic_changelog(commits: List[CommitInfo], changed_files: List[str]
     changelog = '\n\n'.join(changelog_parts)
     
     # Add statistics
-    changelog += f"\n\n---\n\n**变更统计**: {total_categorized} 项变更，涉及 {len(changed_files)} 个文件\n"
-    
-    if diff_stat:
-        changelog += f"\n<details>\n<summary>📈 文件变更详情</summary>\n\n```\n{diff_stat}\n```\n</details>\n"
+    changelog += f"\n\n\n**变更统计**: {total_categorized} 项变更，涉及 {len(changed_files)} 个文件\n"
     
     return changelog
 
@@ -256,12 +277,16 @@ def generate_changelog(from_ref: str, to_ref: str, use_ai: bool = False,
     diff = get_git_diff(from_ref, to_ref, changed_files)
     diff_stat = get_git_diff_stat(from_ref, to_ref, changed_files)
     
-    # Generate header
-    header = f"# 更新日志\n\n**{from_ref} → {to_ref}**\n\n"
+    # Format version strings (remove CI suffixes)
+    display_from = format_version(from_ref)
+    display_to = format_version(to_ref)
+    
+    # Generate header with highlighted target version (info color = green)
+    header = f"# 更新日志\n\n**{display_from} → <font color=\"info\">{display_to}</font>**\n\n"
     if commits:
         first_date, last_date = commits[-1]['date'], commits[0]['date']
         date_info = f"📅 发布日期: {last_date}" if first_date == last_date else f"📅 变更周期: {first_date} ~ {last_date}"
-        header += f"{date_info}\n\n"
+        header += f"{date_info}\n\n\n"
     
     # Generate content based on mode
     if use_ai or dry_run:
@@ -275,9 +300,7 @@ def generate_changelog(from_ref: str, to_ref: str, use_ai: bool = False,
         if ai_content:
             content = ai_content
             # Add statistics for AI mode
-            if diff_stat:
-                content += f"\n\n---\n\n**变更统计**: {len(commits)} 次提交，涉及 {len(changed_files)} 个文件\n"
-                content += f"\n<details>\n<summary>📈 文件变更详情</summary>\n\n```\n{diff_stat}\n```\n</details>\n"
+            content += f"\n\n\n**变更统计**: {len(commits)} 次提交，涉及 {len(changed_files)} 个文件\n"
         else:
             print("⚠️ AI analysis failed, falling back to basic mode")
             content = generate_basic_changelog(commits, changed_files, diff_stat, verbose)

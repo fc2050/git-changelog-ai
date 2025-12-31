@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "git-changelog-ai"
-version = "0.1.0"
+version = "0.2.0"
 description = "AI-powered Git changelog generator that analyzes commits and generates beautiful release notes"
 readme = "README.md"
 license = {text = "MIT"}

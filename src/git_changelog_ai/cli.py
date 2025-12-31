@@ -12,6 +12,7 @@ from .constants import DEFAULT_TAGS_LIMIT, DEFAULT_AI_PROVIDER
 from .config import get_available_providers
 from .git import get_all_tags, is_git_repository, ref_exists
 from .core import generate_changelog
+from .notify import send_changelog_to_wecom
 
 
 def list_tags(date_filter: Optional[str] = None, limit: int = DEFAULT_TAGS_LIMIT) -> None:
@@ -79,12 +80,16 @@ Examples:
   
   # Output to file
   git-changelog-ai --recent 2 --ai --output CHANGELOG.md
+  
+  # Send to WeChat Work group
+  git-changelog-ai --recent 2 --ai --webhook
 
 API Key Configuration:
   Set environment variables:
   - GOOGLE_API_KEY (Gemini, default)
   - OPENAI_API_KEY (OpenAI)
   - DEEPSEEK_API_KEY (DeepSeek)
+  - WECOM_WEBHOOK_URL (WeChat Work webhook for message push)
         """
     )
     
@@ -108,6 +113,10 @@ API Key Configuration:
     parser.add_argument('--dry-run', action='store_true',
                         help='Debug mode: output raw git data and AI prompt without calling AI API')
     
+    parser.add_argument('--webhook', action='store_true',
+                        help='Send changelog to WeChat Work group via webhook')
+    parser.add_argument('--webhook-url', 
+                        help='WeChat Work webhook URL (overrides WECOM_WEBHOOK_URL env var)')
     parser.add_argument('--version', action='store_true', help='Show version information')
     
     return parser
@@ -206,7 +215,7 @@ def main():
             use_ai=args.ai,
             ai_provider=args.provider,
             verbose=args.verbose,
-            dry_run=args.dry_run
+            dry_run=args.dry_run,
         )
         
         if args.output:
@@ -217,6 +226,21 @@ def main():
             print("\n" + "=" * 80)
             print(changelog)
             print("=" * 80)
+        
+        # Send to WeChat Work if webhook is enabled
+        if args.webhook:
+            webhook_url = args.webhook_url or os.environ.get('WECOM_WEBHOOK_URL', '')
+            if not webhook_url:
+                print("\n⚠️ Webhook URL not configured")
+                print("   Set WECOM_WEBHOOK_URL environment variable or use --webhook-url option")
+            else:
+                print("\n📤 Sending changelog to WeChat Work...")
+                
+                success, msg = send_changelog_to_wecom(webhook_url, changelog)
+                if success:
+                    print(f"✅ {msg}")
+                else:
+                    print(f"❌ Failed to send: {msg}")
         
         print("\n🎉 Generation complete!")
         

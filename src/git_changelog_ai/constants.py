@@ -21,6 +21,11 @@ IGNORE_PATTERNS: List[str] = [
     "pnpm-lock.yaml",
 ]
 
+# Authors to ignore (e.g., CI bots)
+IGNORE_AUTHORS: List[str] = [
+    "vfe_athena",
+]
+
 # Commit classification keywords mapping
 COMMIT_KEYWORDS: Dict[str, List[str]] = {
     'new_features': ['新增', '添加', 'add', 'feat', 'feature', '功能', 'new', 'implement', '支持'],

@@ -10,7 +10,7 @@ from typing import List, Tuple
 from datetime import datetime
 
 from .types import CommitInfo, TagInfo
-from .constants import IGNORE_PATTERNS, DEFAULT_MAX_DIFF_LINES
+from .constants import IGNORE_PATTERNS, IGNORE_AUTHORS, DEFAULT_MAX_DIFF_LINES
 
 
 def run_git_command(cmd: str) -> Tuple[bool, str]:
@@ -85,15 +85,22 @@ def get_git_commits(from_ref: str, to_ref: str) -> List[CommitInfo]:
     if not success or not output.strip():
         return []
     
+    # Normalize to lowercase for case-insensitive comparison
+    ignore_authors_lower = [a.lower() for a in IGNORE_AUTHORS]
+    
     commits = []
     for line in output.strip().split('\n'):
         if not line:
             continue
         parts = line.split('|')
         if len(parts) >= 5:
+            author = parts[1]
+            # Skip commits from ignored authors
+            if author.lower() in ignore_authors_lower:
+                continue
             commits.append({
                 'hash': parts[0],
-                'author': parts[1],
+                'author': author,
                 'email': parts[2],
                 'date': parts[3],
                 'message': '|'.join(parts[4:])
