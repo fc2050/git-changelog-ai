@@ -8,10 +8,21 @@
 
 AI-powered changelog generator that analyzes git commits and generates beautiful, structured release notes.
 
+## 🎯 Why Git Changelog AI?
+
+Most changelog tools only reorganize commit messages. **Git Changelog AI is different** - it analyzes actual code changes (`git diff`) to understand what really changed, not just what developers wrote in their commit messages.
+
+| | Traditional Tools | Git Changelog AI |
+|---|---|---|
+| Input | Commit messages only | Commit messages + **Code Diff** |
+| Analysis | Text formatting/classification | **Semantic understanding** |
+| Output | Reorganized commit messages | **Intelligent summary** based on actual changes |
+
 ## ✨ Features
 
-- 🔍 **Intelligent Classification** - Automatically categorizes commits (features, fixes, refactoring, etc.)
-- 🤖 **AI-Powered Analysis** - Uses AI to understand code changes and generate human-friendly descriptions
+- 🧠 **True AI Analysis** - Analyzes actual code diff, not just commit messages
+- 🔍 **Intelligent Classification** - Automatically categorizes changes (features, fixes, refactoring, etc.)
+- 🤖 **Smart Summarization** - AI understands code changes and generates human-friendly descriptions
 - 📝 **Clean Markdown Output** - Generates well-formatted, professional changelogs
 - 🚀 **Zero Dependencies** - Uses only Python standard library (no pip install required for basic mode)
 - 🔌 **Multiple AI Providers** - Supports Gemini, OpenAI, and DeepSeek
