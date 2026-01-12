@@ -107,6 +107,11 @@ git-changelog-ai --recent 2 --ai --webhook
 
 # Send with custom webhook URL
 git-changelog-ai --recent 2 --ai --webhook --webhook-url "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"
+
+# Send existing changelog to webhook (without re-analyzing)
+git-changelog-ai --notify --input CHANGELOG.md
+git-changelog-ai --notify --input CHANGELOG.md --webhook-url "https://..."
+cat CHANGELOG.md | git-changelog-ai --notify
 ```
 
 ### Command Options
@@ -126,6 +131,8 @@ git-changelog-ai --recent 2 --ai --webhook --webhook-url "https://qyapi.weixin.q
 | `--dry-run` | Debug mode without calling AI |
 | `--webhook` | Send changelog to WeChat Work group |
 | `--webhook-url` | Custom webhook URL (overrides env var) |
+| `--notify` | Send existing changelog to webhook (without generating new one) |
+| `--input`, `-i` | Input file path for --notify mode (reads from stdin if not specified) |
 | `--version` | Show version |
 | `--help`, `-h` | Show help message |
 

@@ -84,6 +84,11 @@ Examples:
   # Send to WeChat Work group
   git-changelog-ai --recent 2 --ai --webhook
 
+  # Send existing changelog to webhook (without re-analyzing)
+  git-changelog-ai --notify --input CHANGELOG.md
+  git-changelog-ai --notify --input CHANGELOG.md --webhook-url https://...
+  cat CHANGELOG.md | git-changelog-ai --notify
+
 API Key Configuration:
   Set environment variables:
   - GOOGLE_API_KEY (Gemini, default)
@@ -117,6 +122,13 @@ API Key Configuration:
                         help='Send changelog to WeChat Work group via webhook')
     parser.add_argument('--webhook-url', 
                         help='WeChat Work webhook URL (overrides WECOM_WEBHOOK_URL env var)')
+    
+    # Notify mode: send existing changelog to webhook without re-analyzing
+    parser.add_argument('--notify', action='store_true',
+                        help='Send existing changelog to webhook (without generating new one)')
+    parser.add_argument('-i', '--input', 
+                        help='Input file path for --notify mode (reads from stdin if not specified)')
+    
     parser.add_argument('--version', action='store_true', help='Show version information')
     
     return parser
@@ -159,6 +171,60 @@ def load_env_file() -> None:
         pass  # Silently ignore .env parsing errors
 
 
+def send_existing_changelog(args) -> None:
+    """
+    Send existing changelog content to webhook without re-analyzing.
+    
+    Args:
+        args: Parsed command line arguments
+    """
+    # Determine webhook URL
+    webhook_url = args.webhook_url or os.environ.get('WECOM_WEBHOOK_URL', '')
+    if not webhook_url:
+        print("❌ Error: Webhook URL not configured", file=sys.stderr)
+        print("   Set WECOM_WEBHOOK_URL environment variable or use --webhook-url option", 
+              file=sys.stderr)
+        sys.exit(1)
+    
+    # Read changelog content
+    if args.input:
+        # Read from file
+        input_path = Path(args.input)
+        if not input_path.exists():
+            print(f"❌ Error: Input file not found: {args.input}", file=sys.stderr)
+            sys.exit(1)
+        try:
+            changelog = input_path.read_text(encoding='utf-8')
+        except Exception as e:
+            print(f"❌ Error reading file: {str(e)}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        # Read from stdin
+        if sys.stdin.isatty():
+            print("❌ Error: No input provided", file=sys.stderr)
+            print("   Use --input to specify a file, or pipe content via stdin", file=sys.stderr)
+            print("   Example: cat CHANGELOG.md | git-changelog-ai --notify", file=sys.stderr)
+            sys.exit(1)
+        changelog = sys.stdin.read()
+    
+    if not changelog.strip():
+        print("❌ Error: Empty changelog content", file=sys.stderr)
+        sys.exit(1)
+    
+    # Send to webhook
+    print(f"📤 Sending changelog to WeChat Work...")
+    if args.verbose:
+        print(f"   Webhook URL: {webhook_url[:50]}...")
+        print(f"   Content length: {len(changelog)} characters")
+    
+    success, msg = send_changelog_to_wecom(webhook_url, changelog)
+    if success:
+        print(f"✅ {msg}")
+    else:
+        print(f"❌ Failed to send: {msg}", file=sys.stderr)
+        sys.exit(1)
+
+
 def main():
     """Program entry point."""
     # Load .env file first
@@ -171,6 +237,11 @@ def main():
     if args.version:
         from . import __version__
         print(f"git-changelog-ai version {__version__}")
+        return
+    
+    # Notify mode: send existing changelog to webhook
+    if args.notify:
+        send_existing_changelog(args)
         return
     
     # Check if in Git repository

@@ -107,6 +107,11 @@ git-changelog-ai --recent 2 --ai --webhook
 
 # 使用自定义 webhook URL
 git-changelog-ai --recent 2 --ai --webhook --webhook-url "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx"
+
+# 单独发送已生成的更新日志到 webhook（避免重复 AI 分析）
+git-changelog-ai --notify --input CHANGELOG.md
+git-changelog-ai --notify --input CHANGELOG.md --webhook-url "https://..."
+cat CHANGELOG.md | git-changelog-ai --notify
 ```
 
 ### 命令选项
@@ -126,6 +131,8 @@ git-changelog-ai --recent 2 --ai --webhook --webhook-url "https://qyapi.weixin.q
 | `--dry-run` | 调试模式，不调用 AI |
 | `--webhook` | 推送更新日志到企业微信群 |
 | `--webhook-url` | 自定义 webhook URL（覆盖环境变量） |
+| `--notify` | 单独发送已生成的更新日志到 webhook（无需重新生成） |
+| `--input`, `-i` | --notify 模式的输入文件路径（不指定则从标准输入读取） |
 | `--version` | 显示版本号 |
 | `--help`, `-h` | 显示帮助信息 |
 
