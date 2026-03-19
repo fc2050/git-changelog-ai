@@ -94,6 +94,7 @@ API Key Configuration:
   - GOOGLE_API_KEY (Gemini, default)
   - OPENAI_API_KEY (OpenAI)
   - DEEPSEEK_API_KEY (DeepSeek)
+  - VENUS_API_KEY (Venus Gemini API)
   - WECOM_WEBHOOK_URL (WeChat Work webhook for message push)
         """
     )

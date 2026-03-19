@@ -51,6 +51,21 @@ def call_ai_api(prompt: str, provider: str = DEFAULT_AI_PROVIDER) -> Optional[st
                 'maxOutputTokens': DEFAULT_AI_MAX_OUTPUT_TOKENS
             }
         }
+    elif provider == 'venus':
+        url = config.base_url
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}'
+        }
+        data = {
+            'model': config.model,
+            'messages': [
+                {'role': 'system', 'content': AI_SYSTEM_PROMPT},
+                {'role': 'user', 'content': prompt}
+            ],
+            'temperature': DEFAULT_AI_TEMPERATURE,
+            'max_tokens': DEFAULT_AI_MAX_OUTPUT_TOKENS
+        }
     else:
         url = config.base_url
         headers = {

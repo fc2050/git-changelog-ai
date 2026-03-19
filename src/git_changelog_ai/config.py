@@ -38,6 +38,11 @@ AI_CONFIGS: Dict[str, AIConfig] = {
         base_url='https://api.deepseek.com/v1/chat/completions',
         api_key_env='DEEPSEEK_API_KEY',
         model='deepseek-chat'
+    ),
+    'venus': AIConfig(
+        base_url='http://v2.open.venus.oa.com/llmproxy/chat/completions',
+        api_key_env='VENUS_API_KEY',
+        model='gemini-3.1-pro'
     )
 }
 
