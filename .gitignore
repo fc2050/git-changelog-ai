@@ -76,3 +76,4 @@ Thumbs.db
 output/
 temp/
 tmp/
+.last_changelog_tag
